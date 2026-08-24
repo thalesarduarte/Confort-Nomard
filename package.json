@@ -1,0 +1,16 @@
+{
+  "name": "comfort-nomad",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Comfort Nomad — Sinta-se em casa, antes mesmo de chegar.",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
+    "build": "pnpm --filter api build && pnpm --filter web build",
+    "test": "pnpm --filter api test",
+    "seed": "pnpm --filter api seed",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

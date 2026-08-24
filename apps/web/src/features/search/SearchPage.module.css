@@ -1,0 +1,128 @@
+.hero {
+  text-align: center;
+  padding: 4rem 0 6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.title {
+  font-size: 4rem;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin-bottom: 3rem;
+}
+
+.searchWrapper {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 20;
+}
+
+.searchInput :global(.input) {
+  height: 64px;
+  font-size: 1.25rem;
+  border-radius: var(--radius-lg);
+  padding-left: 3.5rem;
+  background: rgba(26, 34, 53, 0.8);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdownItem:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.cityIcon {
+  font-size: 1.25rem;
+}
+
+.cityName {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.countryName {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.cityCard {
+  padding: 0;
+  cursor: pointer;
+}
+
+.cityImage {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.cityInfo {
+  padding: 1.5rem;
+}
+
+.cityNameCard {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.countryNameCard {
+  font-size: 0.875rem;
+  color: var(--accent-teal);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.tagline {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

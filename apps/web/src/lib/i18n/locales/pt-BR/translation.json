@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "home": "Home",
+    "explore": "Explorar",
+    "profile": "Perfil"
+  },
+  "hero": {
+    "title": "Para onde você quer ir?",
+    "subtitle": "Descubra se uma cidade combina com você antes de chegar",
+    "searchPlaceholder": "Ex: Tóquio, Lisboa, Berlim..."
+  },
+  "onboarding": {
+    "step1Title": "Olá! Vamos criar seu perfil de nômade",
+    "step2Title": "Como você se relaciona com o clima?",
+    "step3Title": "Quais pratos você não consegue viver sem?",
+    "step4Title": "Qual é o seu orçamento mensal estimado?",
+    "step5Title": "Idiomas & Cultura",
+    "next": "Próximo",
+    "back": "Voltar",
+    "finish": "Explorar Destinos"
+  }
+}

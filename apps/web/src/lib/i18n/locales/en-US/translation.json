@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "profile": "Profile"
+  },
+  "hero": {
+    "title": "Where do you want to go?",
+    "subtitle": "Discover if a city suits you before you arrive",
+    "searchPlaceholder": "Ex: Tokyo, Lisbon, Berlin..."
+  },
+  "onboarding": {
+    "step1Title": "Hello! Let's create your nomad profile",
+    "step2Title": "How do you handle the climate?",
+    "step3Title": "What foods can you not live without?",
+    "step4Title": "What is your estimated monthly budget?",
+    "step5Title": "Languages & Culture",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Explore Destinations"
+  }
+}

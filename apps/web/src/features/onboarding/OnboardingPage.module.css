@@ -1,0 +1,211 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressContainer {
+  position: absolute;
+  top: 72px; /* Below header */
+  left: 0;
+  right: 0;
+  padding: 1rem 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 2rem;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 400px;
+}
+
+.heroArt {
+  font-size: 5rem;
+  text-align: center;
+  animation: pulse 3s infinite ease-in-out;
+}
+
+.title {
+  font-size: 2.25rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.grid2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.selectCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  cursor: pointer;
+  border-width: 2px;
+}
+
+.selected {
+  border-color: var(--accent-teal);
+  background: rgba(0, 212, 170, 0.1);
+  box-shadow: var(--shadow-glow);
+}
+
+.cardIcon {
+  font-size: 2.5rem;
+}
+
+.cardLabel {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.foodGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.foodCard {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+}
+
+.foodEmoji {
+  font-size: 1.25rem;
+}
+
+.foodLabel {
+  font-weight: 500;
+}
+
+.budgetDisplay {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--accent-amber);
+  margin: 2rem 0;
+}
+
+.currency {
+  font-size: 1.5rem;
+  vertical-align: top;
+  margin-right: 0.25rem;
+}
+
+.period {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--accent-teal);
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-card);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-teal);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,212,170,0.5);
+}
+
+.sectionTitle {
+  margin-top: 2rem;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.purposeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.purposeChip {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.selectedChip {
+  border-color: var(--accent-violet);
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--accent-violet);
+}
+
+.hintText {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: -1rem;
+}
+
+.sliderWrapper {
+  margin-top: 1rem;
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.sliderValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent-violet);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
