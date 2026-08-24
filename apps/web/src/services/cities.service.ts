@@ -1,4 +1,3 @@
-import { api } from './api';
 import { CitySummary, CityOverview, ClimateOverview, FoodOverview, LocationOverview, CultureOverview, UserPreferenceProfile } from '@/types';
 
 // Mocked data for development until backend is ready
@@ -31,7 +30,7 @@ export const citiesService = {
     }), 500));
   },
 
-  async getCityClimate(cityId: string): Promise<ClimateOverview> {
+  async getCityClimate(_cityId: string): Promise<ClimateOverview> {
     return new Promise(resolve => setTimeout(() => resolve({
       score: 75,
       idealMonths: [4, 5, 9, 10], // May, Jun, Oct, Nov
@@ -48,7 +47,7 @@ export const citiesService = {
     }), 500));
   },
 
-  async getFoodCompatibility(cityId: string): Promise<FoodOverview> {
+  async getFoodCompatibility(_cityId: string): Promise<FoodOverview> {
     return new Promise(resolve => setTimeout(() => resolve({
       score: 90,
       availableFoods: ['Pizza', 'Sushi', 'Café Especial', 'Massas', 'Opções Veganas'],
@@ -62,7 +61,7 @@ export const citiesService = {
     }), 500));
   },
 
-  async getNeighborhoods(cityId: string): Promise<LocationOverview> {
+  async getNeighborhoods(_cityId: string): Promise<LocationOverview> {
     return new Promise(resolve => setTimeout(() => resolve({
       score: 85,
       neighborhoods: [
@@ -84,7 +83,7 @@ export const citiesService = {
     }), 500));
   },
 
-  async getCultureInsights(cityId: string): Promise<CultureOverview> {
+  async getCultureInsights(_cityId: string): Promise<CultureOverview> {
     return new Promise(resolve => setTimeout(() => resolve({
       receptivityScore: 88,
       languageScore: 60,

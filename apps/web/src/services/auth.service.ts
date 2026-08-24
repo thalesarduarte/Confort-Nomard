@@ -1,5 +1,3 @@
-import { api } from './api';
-
 export const authService = {
   // Stub for future
   async login() {
