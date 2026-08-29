@@ -10,9 +10,10 @@ import { ClimateModule } from './ClimateModule';
 import { FoodModule } from './FoodModule';
 import { LocationModule } from './LocationModule';
 import { CultureModule } from './CultureModule';
+import { AiRecommendationsPanel } from './AiRecommendationsPanel';
 import styles from './CityResultsPage.module.css';
 
-type Tab = 'climate' | 'food' | 'location' | 'culture';
+type Tab = 'climate' | 'food' | 'location' | 'culture' | 'ai';
 
 export const CityResultsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,6 +96,7 @@ export const CityResultsPage: React.FC = () => {
           { id: 'food', icon: '🍽', label: 'Comida' },
           { id: 'location', icon: '🏘', label: 'Bairros' },
           { id: 'culture', icon: '🌐', label: 'Cultura' },
+          { id: 'ai', icon: '✨', label: 'IA' },
         ].map(tab => (
           <button
             key={tab.id}
@@ -112,6 +114,7 @@ export const CityResultsPage: React.FC = () => {
         {activeTab === 'food' && cityStore.food && <FoodModule data={cityStore.food} />}
         {activeTab === 'location' && cityStore.location && <LocationModule data={cityStore.location} />}
         {activeTab === 'culture' && cityStore.culture && <CultureModule data={cityStore.culture} />}
+        {activeTab === 'ai' && <AiRecommendationsPanel cityName={city.name} />}
       </div>
     </PageWrapper>
   );

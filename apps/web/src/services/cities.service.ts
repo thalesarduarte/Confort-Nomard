@@ -94,5 +94,26 @@ export const citiesService = {
         { id: 'i3', category: 'BUREAUCRACY', severity: 'WARNING', title: 'Slow processes', description: 'Visas and apartment rentals can take months.' }
       ]
     }), 500));
-  }
+  },
+
+  /**
+   * Tries to resolve a city name to a real DB city id.
+   * Calls the real backend (not mock) — returns null if city not found or backend is down.
+   * Used by AiRecommendationsPanel to bridge the mock UI with real AI data.
+   */
+  async resolveRealCityId(cityName: string): Promise<string | null> {
+    try {
+      const response = await api.get<{ id: string; name: string }[]>(
+        `/cities/search?q=${encodeURIComponent(cityName)}`
+      );
+      const results = response.data;
+      if (Array.isArray(results) && results.length > 0) {
+        return results[0].id;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
 };
+

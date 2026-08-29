@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@/store/useUserStore';
@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { PageWrapper } from '@/components/layout/PageWrapper';
+import { Spinner } from '@/components/ui/Spinner';
+import { aiService, ChatMessage, OnboardingAiResponse } from '@/services/ai.service';
 import styles from './OnboardingPage.module.css';
 
 const FOOD_OPTIONS = [
@@ -25,8 +27,8 @@ const FOOD_OPTIONS = [
 export const OnboardingPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setProfile } = useUserStore();
-  
+  const { setProfile, setTempProfile } = useUserStore();
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -36,20 +38,29 @@ export const OnboardingPage: React.FC = () => {
     budgetMonthlyUsd: 2000,
     travelPurpose: 'DIGITAL_NOMAD' as any,
     languages: ['EN'],
-    culturalOpenness: 7
+    culturalOpenness: 7,
   });
+
+  // ─── Step 6 chat state ────────────────────────────────────────────────────────
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiDone, setAiDone] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [lastResponse, setLastResponse] = useState<OnboardingAiResponse | null>(null);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const step6Initialized = useRef(false);
 
   const updateForm = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
   const handleNext = () => {
-    if (step < 5) setStep(s => s + 1);
+    if (step < 6) setStep(s => s + 1);
     else handleFinish();
   };
 
   const handleFinish = () => {
-    setProfile(formData);
+    setProfile(formData as any);
     navigate('/search');
   };
 
@@ -62,7 +73,80 @@ export const OnboardingPage: React.FC = () => {
     }
   };
 
-  const progress = (step / 5) * 100;
+  const progress = (step / 6) * 100;
+
+  // ─── AI Chat logic ────────────────────────────────────────────────────────────
+
+  const profileSoFar = {
+    thermalSensitivity: formData.thermalSensitivity,
+    comfortFoods: formData.comfortFoods,
+    budgetMonthlyUsd: formData.budgetMonthlyUsd,
+    travelPurpose: formData.travelPurpose,
+    culturalOpenness: formData.culturalOpenness,
+  };
+
+  const sendAiMessage = async (history: ChatMessage[]) => {
+    setAiLoading(true);
+    try {
+      const response = await aiService.continueOnboarding(history, profileSoFar, 'pt-BR');
+      setLastResponse(response);
+
+      const assistantMsg: ChatMessage = { role: 'assistant', content: response.message };
+      setChatHistory(prev => [...prev, assistantMsg]);
+
+      if (response.done) {
+        setAiDone(true);
+        // Merge extracted comfortFoods (uppercase → match FOOD_OPTIONS ids which are lowercase)
+        const extractedFoods = (response.extractedPreferences.comfortFoods ?? [])
+          .map((f: string) => f.toLowerCase())
+          .filter((f: string) => FOOD_OPTIONS.some(opt => opt.id === f));
+        const merged = Array.from(new Set([...formData.comfortFoods, ...extractedFoods]));
+        updateForm({ comfortFoods: merged });
+
+        // Save freeform tags and notes in tempProfile
+        setTempProfile({
+          freeformTags: response.extractedPreferences.freeformTags,
+          aiNotes: response.extractedPreferences.notes,
+        } as any);
+      }
+    } catch {
+      const errorMsg: ChatMessage = {
+        role: 'assistant',
+        content: 'Ops! Não consegui processar sua resposta. Tente novamente ou pule esta etapa.',
+      };
+      setChatHistory(prev => [...prev, errorMsg]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Auto-start step 6
+  useEffect(() => {
+    if (step === 6 && !step6Initialized.current) {
+      step6Initialized.current = true;
+      sendAiMessage([]);
+    }
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory]);
+
+  const handleSendMessage = async (text: string) => {
+    if (!text.trim() || aiLoading || aiDone) return;
+    const userMsg: ChatMessage = { role: 'user', content: text.trim() };
+    const newHistory = [...chatHistory, userMsg];
+    setChatHistory(newHistory);
+    setChatInput('');
+    await sendAiMessage(newHistory);
+  };
+
+  const handleQuickReply = (reply: string) => {
+    handleSendMessage(reply);
+  };
+
+  // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <PageWrapper className={styles.wrapper}>
@@ -76,17 +160,17 @@ export const OnboardingPage: React.FC = () => {
             <div className={styles.heroArt}>🌍</div>
             <h1 className={styles.title}>{t('onboarding.step1Title', "Olá! Vamos criar seu perfil de nômade")}</h1>
             <p className={styles.subtitle}>Personalize suas recomendações baseadas no que realmente importa para você.</p>
-            
+
             <div className={styles.formGroup}>
-              <Input 
-                label="Seu Nome" 
-                placeholder="Como gosta de ser chamado?" 
+              <Input
+                label="Seu Nome"
+                placeholder="Como gosta de ser chamado?"
                 value={formData.name}
                 onChange={e => updateForm({ name: e.target.value })}
               />
-              <Input 
-                label="E-mail (opcional)" 
-                placeholder="Para salvar seu perfil" 
+              <Input
+                label="E-mail (opcional)"
+                placeholder="Para salvar seu perfil"
                 type="email"
                 value={formData.email}
                 onChange={e => updateForm({ email: e.target.value })}
@@ -105,7 +189,7 @@ export const OnboardingPage: React.FC = () => {
                 { id: 'SENSITIVE', icon: '🌡', label: 'Sou sensível a extremos' },
                 { id: 'COLD_LOVER', icon: '❄️', label: 'Prefiro frio' },
               ].map(opt => (
-                <Card 
+                <Card
                   key={opt.id}
                   className={`${styles.selectCard} ${formData.thermalSensitivity === opt.id ? styles.selected : ''}`}
                   onClick={() => updateForm({ thermalSensitivity: opt.id as any })}
@@ -124,7 +208,7 @@ export const OnboardingPage: React.FC = () => {
             <h1 className={styles.title}>{t('onboarding.step3Title', 'Quais pratos você não consegue viver sem?')}</h1>
             <div className={styles.foodGrid}>
               {FOOD_OPTIONS.map(food => (
-                <Card 
+                <Card
                   key={food.id}
                   className={`${styles.foodCard} ${formData.comfortFoods.includes(food.id) ? styles.selected : ''}`}
                   onClick={() => toggleFood(food.id)}
@@ -141,17 +225,17 @@ export const OnboardingPage: React.FC = () => {
         {step === 4 && (
           <div className={`${styles.step} animate-slide-up`}>
             <h1 className={styles.title}>{t('onboarding.step4Title', 'Qual é o seu orçamento mensal estimado?')}</h1>
-            
+
             <div className={styles.budgetDisplay}>
               <span className={styles.currency}>$</span>
               <span className={styles.amount}>{formData.budgetMonthlyUsd}</span>
               <span className={styles.period}>/mês (USD)</span>
             </div>
-            
-            <input 
-              type="range" 
-              min="500" 
-              max="10000" 
+
+            <input
+              type="range"
+              min="500"
+              max="10000"
               step="100"
               value={formData.budgetMonthlyUsd}
               onChange={e => updateForm({ budgetMonthlyUsd: parseInt(e.target.value) })}
@@ -166,7 +250,7 @@ export const OnboardingPage: React.FC = () => {
                 { id: 'STUDENT', icon: '🎓', label: 'Estudante' },
                 { id: 'TOURIST', icon: '📸', label: 'Turista' },
               ].map(opt => (
-                <div 
+                <div
                   key={opt.id}
                   className={`${styles.purposeChip} ${formData.travelPurpose === opt.id ? styles.selectedChip : ''}`}
                   onClick={() => updateForm({ travelPurpose: opt.id as any })}
@@ -181,14 +265,14 @@ export const OnboardingPage: React.FC = () => {
         {step === 5 && (
           <div className={`${styles.step} animate-slide-up`}>
             <h1 className={styles.title}>{t('onboarding.step5Title', 'Idiomas & Cultura')}</h1>
-            
+
             <h3 className={styles.sectionTitle}>Nível de abertura cultural (1-10)</h3>
             <p className={styles.hintText}>O quanto você está disposto a se adaptar a costumes muito diferentes dos seus?</p>
             <div className={styles.sliderWrapper}>
-              <input 
-                type="range" 
-                min="1" 
-                max="10" 
+              <input
+                type="range"
+                min="1"
+                max="10"
                 value={formData.culturalOpenness}
                 onChange={e => updateForm({ culturalOpenness: parseInt(e.target.value) })}
                 className={styles.slider}
@@ -202,18 +286,96 @@ export const OnboardingPage: React.FC = () => {
           </div>
         )}
 
+        {step === 6 && (
+          <div className={`${styles.step} animate-slide-up`}>
+            <h1 className={styles.title}>✨ Refinamento com IA</h1>
+            <p className={styles.subtitle}>
+              Deixe nosso assistente te fazer algumas perguntas rápidas para personalizar ainda mais suas recomendações.
+            </p>
+
+            <div className={styles.chatArea}>
+              {chatHistory.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`${styles.bubble} ${msg.role === 'assistant' ? styles.bubbleAssistant : styles.bubbleUser}`}
+                >
+                  {msg.content}
+                </div>
+              ))}
+
+              {aiLoading && (
+                <div className={`${styles.bubble} ${styles.bubbleAssistant}`}>
+                  <Spinner size="sm" />
+                </div>
+              )}
+
+              <div ref={chatBottomRef} />
+            </div>
+
+            {/* Quick replies */}
+            {!aiDone && !aiLoading && lastResponse && lastResponse.quickReplies.length > 0 && (
+              <div className={styles.quickReplies}>
+                {lastResponse.quickReplies.map((reply, idx) => (
+                  <button
+                    key={idx}
+                    className={styles.quickReply}
+                    onClick={() => handleQuickReply(reply)}
+                  >
+                    {reply}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Free-text input */}
+            {!aiDone && (
+              <div className={styles.chatInputRow}>
+                <input
+                  className={styles.chatInput}
+                  placeholder="Digite sua resposta..."
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSendMessage(chatInput)}
+                  disabled={aiLoading}
+                />
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleSendMessage(chatInput)}
+                  disabled={aiLoading || !chatInput.trim()}
+                >
+                  Enviar
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className={styles.footer}>
-          {step > 1 ? (
+          {step > 1 && step < 6 ? (
             <Button variant="ghost" onClick={() => setStep(s => s - 1)}>
               {t('onboarding.back', 'Voltar')}
             </Button>
+          ) : step === 6 ? (
+            <Button variant="ghost" onClick={handleFinish}>
+              Pular esta etapa
+            </Button>
           ) : <div></div>}
-          
-          <Button variant="primary" size="lg" onClick={handleNext}>
-            {step === 5 ? t('onboarding.finish', 'Explorar Destinos') : t('onboarding.next', 'Próximo')}
-          </Button>
+
+          {step === 6 ? (
+            aiDone ? (
+              <Button variant="primary" size="lg" onClick={handleFinish}>
+                {t('onboarding.finish', 'Explorar Destinos')}
+              </Button>
+            ) : null
+          ) : (
+            <Button variant="primary" size="lg" onClick={handleNext}>
+              {step === 5 ? t('onboarding.next', 'Próximo') : t('onboarding.next', 'Próximo')}
+            </Button>
+          )}
         </div>
       </div>
     </PageWrapper>
   );
 };
+

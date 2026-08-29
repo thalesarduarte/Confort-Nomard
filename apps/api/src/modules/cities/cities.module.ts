@@ -20,5 +20,6 @@ import { UsersModule } from '../users/users.module';
   ],
   providers: [CitiesService],
   controllers: [CitiesController],
+  exports: [CitiesService],
 })
 export class CitiesModule {}

@@ -54,6 +54,8 @@ services:
       REDIS_PORT: 6379
       JWT_SECRET: change-this-secret-in-production-minimum-32-chars
       JWT_EXPIRES_IN: 7d
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-5}
     ports:
       - '3000:3000'
     volumes:

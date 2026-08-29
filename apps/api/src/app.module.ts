@@ -10,6 +10,7 @@ import { ClimateModule } from './modules/climate/climate.module';
 import { FoodModule } from './modules/food/food.module';
 import { LocationModule } from './modules/location/location.module';
 import { CultureModule } from './modules/culture/culture.module';
+import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CultureModule } from './modules/culture/culture.module';
     FoodModule,
     LocationModule,
     CultureModule,
+    AiModule,
   ],
 })
 export class AppModule {}

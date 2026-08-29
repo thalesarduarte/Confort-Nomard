@@ -12,6 +12,7 @@
     "lint": "eslint \"{src,test}/**/*.ts\""
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0",
     "@comfort-nomad/shared-types": "workspace:*",
     "@nestjs/cache-manager": "^2.2.0",
     "@nestjs/common": "^10.3.0",
