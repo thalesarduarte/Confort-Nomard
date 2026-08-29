@@ -7,7 +7,6 @@ import { ClimateModule } from '../climate/climate.module';
 import { FoodModule } from '../food/food.module';
 import { LocationModule } from '../location/location.module';
 import { CultureModule } from '../culture/culture.module';
-import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -16,7 +15,6 @@ import { UsersModule } from '../users/users.module';
     FoodModule,
     LocationModule,
     CultureModule,
-    UsersModule,
   ],
   providers: [CitiesService],
   controllers: [CitiesController],

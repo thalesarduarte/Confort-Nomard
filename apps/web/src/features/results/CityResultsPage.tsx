@@ -31,12 +31,18 @@ export const CityResultsPage: React.FC = () => {
     const loadData = async () => {
       cityStore.setLoading(true);
       try {
+        const sensitivity = profile?.thermalSensitivity ?? 'TOLERANT';
+        const comfortFoods = profile?.comfortFoods ?? [];
+        const budget = profile?.budgetMonthlyUsd ?? 2000;
+        const currency = 'USD';
+        const openness = profile?.culturalOpenness ?? 5;
+
         const [overview, climate, food, location, culture] = await Promise.all([
           citiesService.getCityOverview(id, profile || undefined),
-          citiesService.getCityClimate(id),
-          citiesService.getFoodCompatibility(id),
-          citiesService.getNeighborhoods(id),
-          citiesService.getCultureInsights(id)
+          citiesService.getCityClimate(id, sensitivity),
+          citiesService.getFoodCompatibility(id, comfortFoods),
+          citiesService.getNeighborhoods(id, budget, currency),
+          citiesService.getCultureInsights(id, openness),
         ]);
 
         cityStore.setCityData({
@@ -45,7 +51,7 @@ export const CityResultsPage: React.FC = () => {
           climate,
           food,
           location,
-          culture
+          culture,
         });
       } catch (err) {
         console.error(err);
@@ -110,10 +116,26 @@ export const CityResultsPage: React.FC = () => {
       </div>
 
       <div className={styles.moduleContainer}>
-        {activeTab === 'climate' && cityStore.climate && <ClimateModule data={cityStore.climate} />}
-        {activeTab === 'food' && cityStore.food && <FoodModule data={cityStore.food} />}
-        {activeTab === 'location' && cityStore.location && <LocationModule data={cityStore.location} />}
-        {activeTab === 'culture' && cityStore.culture && <CultureModule data={cityStore.culture} />}
+        {activeTab === 'climate' && cityStore.climate && (
+          cityStore.climate.monthlyData.length === 0
+            ? <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.6 }}>⏳ {cityStore.climate.summary}</div>
+            : <ClimateModule data={cityStore.climate} />
+        )}
+        {activeTab === 'food' && cityStore.food && (
+          cityStore.food.topEstablishments.length === 0 && cityStore.food.availableFoods.length === 0
+            ? <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.6 }}>⏳ {cityStore.food.summary}</div>
+            : <FoodModule data={cityStore.food} />
+        )}
+        {activeTab === 'location' && cityStore.location && (
+          cityStore.location.neighborhoods.length === 0
+            ? <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.6 }}>🏘 Ainda não temos dados de bairros curados para esta cidade.</div>
+            : <LocationModule data={cityStore.location} />
+        )}
+        {activeTab === 'culture' && cityStore.culture && (
+          cityStore.culture.insights.length === 0
+            ? <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.6 }}>🌐 Ainda não temos insights culturais curados para esta cidade.</div>
+            : <CultureModule data={cityStore.culture} />
+        )}
         {activeTab === 'ai' && <AiRecommendationsPanel cityName={city.name} />}
       </div>
     </PageWrapper>
