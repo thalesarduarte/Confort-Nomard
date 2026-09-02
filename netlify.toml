@@ -1,0 +1,22 @@
+﻿[build]
+  base    = "."
+  publish = "apps/web/dist"
+  command = "pnpm install --frozen-lockfile && pnpm --filter web build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  PNPM_VERSION = "9"
+
+# Proxy API calls to the Render backend
+# Set VITE_API_URL in Netlify env vars to your Render service URL
+# e.g. https://comfort-nomad-api.onrender.com/api
+[[redirects]]
+  from   = "/api/*"
+  to     = ":splat"
+  status = 200
+
+# SPA fallback â€” all non-file routes go to index.html
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

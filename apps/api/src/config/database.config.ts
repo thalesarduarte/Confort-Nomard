@@ -24,10 +24,14 @@ const useSQLite = process.env.USE_SQLITE === 'true' || !process.env.DB_HOST;
 
 export default (): TypeOrmModuleOptions => {
   if (useSQLite) {
-    console.log('📦 Using SQLite (demo mode — no Docker required)');
+    const dbPath =
+      process.env.NODE_ENV === 'production'
+        ? '/data/comfort_nomad.sqlite'
+        : 'comfort_nomad_demo.sqlite';
+    console.log(`📦 Using SQLite (${dbPath})`);
     return {
       type: 'better-sqlite3',
-      database: 'comfort_nomad_demo.sqlite',
+      database: dbPath,
       entities,
       synchronize: true,
     } as TypeOrmModuleOptions;

@@ -1,0 +1,35 @@
+﻿services:
+  - type: web
+    name: comfort-nomad-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: apps/api
+    buildCommand: npm install && npm run build
+    startCommand: node dist/main
+    healthCheckPath: /api/health
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: USE_SQLITE
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5
+      - key: OPEN_METEO_BASE_URL
+        value: https://api.open-meteo.com/v1
+      - key: OVERPASS_BASE_URL
+        value: https://overpass-api.de/api
+      - key: ALLOWED_ORIGINS
+        sync: false
