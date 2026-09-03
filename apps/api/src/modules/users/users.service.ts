@@ -34,4 +34,11 @@ export class UsersService {
     await this.profileRepo.update({ userId }, profileData);
     return this.profileRepo.findOne({ where: { userId } });
   }
+
+  async updateUser(userId: string, data: { name?: string; email?: string }): Promise<User> {
+    if (Object.keys(data).length > 0) {
+      await this.usersRepo.update({ id: userId }, data);
+    }
+    return this.findById(userId);
+  }
 }

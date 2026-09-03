@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
-import { ThermalSensitivity, TravelPurpose } from '@comfort-nomad/shared-types';
+import { ThermalSensitivity, TravelPurpose, WorkStyle, PacePreference } from '@comfort-nomad/shared-types';
 
 @Entity('user_preference_profiles')
 export class UserPreferenceProfile {
@@ -30,6 +30,15 @@ export class UserPreferenceProfile {
 
   @Column('simple-array', { default: 'pt' })
   languages: string[];
+
+  @Column({ type: 'simple-enum', enum: WorkStyle, nullable: true })
+  workStyle: WorkStyle;
+
+  @Column({ type: 'simple-enum', enum: PacePreference, nullable: true })
+  pacePreference: PacePreference;
+
+  @Column('simple-json', { nullable: true })
+  priorityRanking: string[];
 
   @OneToOne(() => User)
   @JoinColumn({ name: 'userId' })

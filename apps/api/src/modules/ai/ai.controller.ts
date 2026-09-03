@@ -14,6 +14,7 @@ import { CitiesService } from '../cities/cities.service';
 import { FoodService } from '../food/food.service';
 import { LocationService } from '../location/location.service';
 import { CultureService } from '../culture/culture.service';
+import { RecommendDestinationsDto } from './dto/recommend-destinations.dto';
 
 @Controller('ai')
 export class AiController {
@@ -92,5 +93,55 @@ export class AiController {
       maxItems: dto.maxItems ?? 5,
       locale: dto.locale ?? 'pt-BR',
     });
+  }
+
+  /**
+   * POST /ai/recommend-destinations
+   * Public endpoint — no JWT required.
+   * Returns AI-ranked city recommendations based on user profile.
+   */
+  @Post('recommend-destinations')
+  @HttpCode(HttpStatus.OK)
+  async recommendDestinations(@Body() dto: RecommendDestinationsDto) {
+    // 1. Get all cities from DB
+    const cities = await this.citiesService.search('');
+
+    // 2. Calculate a quick overallScore for each city using the profile
+    const citySnapshots = await Promise.all(
+      cities.map(async (city) => {
+        try {
+          const overview = await this.citiesService.getOverview(city.id, dto.profile ?? {});
+          return {
+            id: city.id,
+            name: city.name,
+            country: city.country,
+            imageUrl: city.imageUrl,
+            overallScore: overview.overallScore,
+          };
+        } catch {
+          return { id: city.id, name: city.name, country: city.country, imageUrl: city.imageUrl };
+        }
+      }),
+    );
+
+    // 3. Call AI with grounding
+    const result = await this.aiService.recommendDestinations({
+      cities: citySnapshots,
+      profile: dto.profile,
+      freeformTags: dto.freeformTags,
+      priorityRanking: dto.priorityRanking,
+      maxItems: dto.maxItems ?? 6,
+      locale: dto.locale ?? 'pt-BR',
+    });
+
+    // 4. Enrich picks with imageUrl from our snapshots
+    const snapMap = new Map(citySnapshots.map(s => [s.id, s]));
+    const enrichedPicks = result.picks.map(pick => ({
+      ...pick,
+      imageUrl: snapMap.get(pick.cityId)?.imageUrl ?? null,
+      overallScore: snapMap.get(pick.cityId)?.overallScore ?? pick.matchScore,
+    }));
+
+    return { picks: enrichedPicks };
   }
 }

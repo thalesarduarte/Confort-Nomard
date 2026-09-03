@@ -13,6 +13,9 @@ export interface OnboardingAiResponse {
     comfortFoods: string[];
     freeformTags: string[];
     notes: string;
+    workStyle: string | null;
+    pacePreference: string | null;
+    priorityRanking: string[];
   };
 }
 
@@ -48,6 +51,34 @@ export interface RecommendForCityParams {
   profile?: Record<string, unknown>;
   freeformTags?: string[];
   grounding: Grounding;
+  maxItems?: number;
+  locale?: string;
+}
+
+export interface DestinationPick {
+  cityId: string;
+  cityName: string;
+  country: string;
+  matchScore: number;
+  reason: string;
+}
+
+export interface DestinationRecommendationsResult {
+  picks: DestinationPick[];
+}
+
+export interface CitySnapshot {
+  id: string;
+  name: string;
+  country: string;
+  overallScore?: number;
+}
+
+export interface RecommendDestinationsParams {
+  cities: CitySnapshot[];
+  profile?: Record<string, unknown>;
+  freeformTags?: string[];
+  priorityRanking?: string[];
   maxItems?: number;
   locale?: string;
 }
@@ -107,18 +138,21 @@ export class AiService {
 
     const systemPrompt = `Você é um assistente de viagem amigável do Comfort Nomad que está conduzindo uma conversa de refinamento de perfil com um usuário nômade digital. ${locale === 'pt-BR' ? 'Responda em Português do Brasil.' : `Respond in ${locale}.`}
 
-Objetivo: Fazer até 3 perguntas curtas e objetivas para descobrir preferências adicionais que NÃO foram capturadas pelo formulário. NÃO repita perguntas sobre informações já conhecidas.${profileSection}
+Objetivo: Fazer até 5 perguntas curtas e objetivas para descobrir preferências adicionais que NÃO foram capturadas pelo formulário. NÃO repita perguntas sobre informações já conhecidas.${profileSection}
 
-Exemplos de tópicos úteis para explorar (se ainda não coletados):
-- Preferências de ambiente de trabalho (coworking, cafés, casa)
-- Necessidades de conectividade (velocidade de internet, VPN)
-- Preferências de vida noturna e socialização
-- Preferências de transporte (moto, bicicleta, transporte público)
-- Animais de estimação ou restrições específicas
+Tópicos prioritários para explorar (se ainda não coletados):
+- Rotina de trabalho: remoto fixo, híbrido ou precisa de escritório físico? Há conflito de fuso horário com o Brasil?
+- Ritmo de vida preferido: cidade agitada e cheia de estímulos vs. tranquila e com mais natureza
+- Prioridade entre os 4 pilares quando há trade-off: clima, custo de vida, comida familiar, experiência cultural
+- Situação familiar/pets: isso impacta na escolha de bairro e tipo de moradia
+- Urgência e horizonte da mudança: já decidido e precisa sair em meses, ou só pesquisando por agora?
 
-Quando já tiver informações suficientes (após 1-3 trocas) ou o usuário quiser encerrar, retorne done: true com um resumo amigável.
+Quando já tiver informações suficientes (após 3-5 trocas) ou o usuário quiser encerrar, retorne done: true com um resumo amigável.
 
-Os comfortFoods extraídos devem ser SOMENTE dos valores: ${KNOWN_COMFORT_FOODS.join(', ')}.`;
+Os comfortFoods extraídos devem ser SOMENTE dos valores: ${KNOWN_COMFORT_FOODS.join(', ')}.
+workStyle deve ser um de: REMOTE_FIXED, HYBRID, NEEDS_OFFICE, ou null se não mencionado.
+pacePreference deve ser um de: FAST_PACED, BALANCED, SLOW_PACED, ou null se não mencionado.
+prioriityRanking deve ser um array ordenado com os pilares mencionados, ex: ['budget','climate','food','culture'].`;
 
     // Build messages — always end on user role
     let messages: { role: 'user' | 'assistant'; content: string }[];
@@ -174,8 +208,25 @@ Os comfortFoods extraídos devem ser SOMENTE dos valores: ${KNOWN_COMFORT_FOODS.
                 type: 'string',
                 description: 'Resumo de 1-2 frases das preferências capturadas',
               },
+              workStyle: {
+                type: 'string',
+                enum: ['REMOTE_FIXED', 'HYBRID', 'NEEDS_OFFICE'],
+                description: 'Estilo de trabalho identificado na conversa, ou null',
+                nullable: true,
+              },
+              pacePreference: {
+                type: 'string',
+                enum: ['FAST_PACED', 'BALANCED', 'SLOW_PACED'],
+                description: 'Ritmo de vida preferido identificado na conversa, ou null',
+                nullable: true,
+              },
+              prioriityRanking: {
+                type: 'array',
+                items: { type: 'string' },
+                description: "Pilares em ordem de importância, ex: ['budget','climate','food','culture']",
+              },
             },
-            required: ['comfortFoods', 'freeformTags', 'notes'],
+            required: ['comfortFoods', 'freeformTags', 'notes', 'workStyle', 'pacePreference', 'priorityRanking'],
           },
         },
         required: ['done', 'message', 'quickReplies', 'extractedPreferences'],
@@ -322,5 +373,85 @@ Selecione até ${maxItems} destaques personalizados para este usuário, usando S
       summary: raw.summary,
       highlights: filteredHighlights,
     };
+  }
+
+  // ─── Destination Recommendations ─────────────────────────────────────────────
+
+  async recommendDestinations(params: RecommendDestinationsParams): Promise<DestinationRecommendationsResult> {
+    const client = this.ensureClient();
+    const { cities, profile, freeformTags, priorityRanking, maxItems = 6, locale = 'pt-BR' } = params;
+
+    const cityList = cities
+      .map(c => `  - id:"${c.id}" | ${c.name}, ${c.country}${c.overallScore != null ? ` | score:${c.overallScore}` : ''}`)
+      .join('\n');
+
+    const profileSection = profile
+      ? `\nPerfil do usuário:\n${JSON.stringify(profile, null, 2)}`
+      : '';
+    const tagsSection = freeformTags?.length
+      ? `\nTags livres: ${freeformTags.join(', ')}`
+      : '';
+    const prioritySection = priorityRanking?.length
+      ? `\nPrioridade entre pilares (do mais ao menos importante): ${priorityRanking.join(' > ')}`
+      : '';
+
+    const systemPrompt = `Você é um especialista em recomendações de destinos para nômades digitais do Comfort Nomad. ${
+      locale === 'pt-BR' ? 'Responda em Português do Brasil.' : `Respond in ${locale}.`
+    }\n\nIMPORTANTE: Você DEVE citar SOMENTE cidades que existem na lista abaixo. Use EXATAMENTE o id fornecido.`;
+
+    const userPrompt = `${profileSection}${tagsSection}${prioritySection}\n\n=== CIDADES DISPONÍVEIS NO BANCO (USE SOMENTE ESTAS) ===\n${cityList}\n=== FIM DAS CIDADES ===\n\nSelecione as ${maxItems} cidades que melhor combinam com este perfil. Para cada uma, use o id EXATO da lista e escreva um reason pessoal e específico de 1-2 frases.`;
+
+    const tool: Anthropic.Tool = {
+      name: 'destination_recommendations',
+      description: 'Retorna recomendações personalizadas de destinos para o usuário.',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          picks: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                cityId: { type: 'string', description: 'ID EXATO da cidade do grounding' },
+                cityName: { type: 'string', description: 'Nome da cidade' },
+                country: { type: 'string', description: 'País da cidade' },
+                matchScore: { type: 'number', description: 'Score de compatibilidade 0-100' },
+                reason: { type: 'string', description: 'Motivo pessoal em 1-2 frases' },
+              },
+              required: ['cityId', 'cityName', 'country', 'matchScore', 'reason'],
+            },
+          },
+        },
+        required: ['picks'],
+      },
+    };
+
+    const response = await client.messages.create({
+      model: this.model,
+      max_tokens: 2048,
+      system: systemPrompt,
+      tools: [tool],
+      tool_choice: { type: 'tool', name: 'destination_recommendations' },
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const toolUse = response.content.find((block) => block.type === 'tool_use');
+    if (!toolUse || toolUse.type !== 'tool_use') {
+      throw new Error('Unexpected response format from Anthropic API');
+    }
+
+    const raw = toolUse.input as DestinationRecommendationsResult;
+
+    // Anti-hallucination: filter to only valid city ids
+    const validCityIds = new Set(cities.map(c => c.id));
+    const filteredPicks = raw.picks.filter(p => {
+      const isValid = validCityIds.has(p.cityId);
+      if (!isValid) {
+        this.logger.warn(`Filtered hallucinated cityId: "${p.cityId}" (not in grounding)`);
+      }
+      return isValid;
+    });
+
+    return { picks: filteredPicks };
   }
 }

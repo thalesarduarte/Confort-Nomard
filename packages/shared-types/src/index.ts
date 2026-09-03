@@ -52,6 +52,18 @@ export enum ComfortFood {
   BREAD = 'BREAD'
 }
 
+export enum WorkStyle {
+  REMOTE_FIXED = 'REMOTE_FIXED',
+  HYBRID = 'HYBRID',
+  NEEDS_OFFICE = 'NEEDS_OFFICE',
+}
+
+export enum PacePreference {
+  FAST_PACED = 'FAST_PACED',
+  BALANCED = 'BALANCED',
+  SLOW_PACED = 'SLOW_PACED',
+}
+
 export interface User {
   id: string;
   email: string;

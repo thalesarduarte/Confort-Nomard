@@ -47,14 +47,19 @@ export const Header: React.FC = () => {
           </button>
           
           {isLoggedIn ? (
-            <div className={styles.avatar}>
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
+            <Link to="/profile" className={styles.avatarLink}>
+              <div className={styles.avatar}>
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
+            </Link>
           ) : (
-            <Button variant="ghost" size="sm">Login</Button>
+            <Link to="/login">
+              <Button variant="ghost" size="sm">Login</Button>
+            </Link>
           )}
         </div>
       </div>
     </header>
   );
 };
+

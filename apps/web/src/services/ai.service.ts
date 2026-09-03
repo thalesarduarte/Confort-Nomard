@@ -1,5 +1,5 @@
 import { api } from './api';
-import { UserPreferenceProfile } from '@/types';
+import { UserPreferenceProfile, DestinationRecommendation } from '@/types';
 
 // ─── Shared types ─────────────────────────────────────────────────────────────
 
@@ -12,6 +12,9 @@ export interface ExtractedPreferences {
   comfortFoods: string[];
   freeformTags: string[];
   notes: string;
+  workStyle?: string | null;
+  pacePreference?: string | null;
+  priorityRanking?: string[];
 }
 
 export interface OnboardingAiResponse {
@@ -69,4 +72,26 @@ export const aiService = {
     );
     return response.data;
   },
+
+  /**
+   * Fetches AI-ranked destination recommendations based on the user profile.
+   * Returns picks sorted by matchScore, each with a personal reason.
+   */
+  async recommendDestinations(
+    profile?: Partial<UserPreferenceProfile>,
+    opts?: { freeformTags?: string[]; priorityRanking?: string[]; maxItems?: number; locale?: string },
+  ): Promise<DestinationRecommendation[]> {
+    const response = await api.post<{ picks: DestinationRecommendation[] }>(
+      '/ai/recommend-destinations',
+      {
+        profile,
+        freeformTags: opts?.freeformTags,
+        priorityRanking: opts?.priorityRanking,
+        maxItems: opts?.maxItems ?? 6,
+        locale: opts?.locale ?? 'pt-BR',
+      },
+    );
+    return response.data.picks;
+  },
 };
+

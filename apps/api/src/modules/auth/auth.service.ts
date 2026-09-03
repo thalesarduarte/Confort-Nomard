@@ -36,7 +36,12 @@ export class AuthService {
       passwordHash,
       locale: registerDto.locale || 'pt-BR',
     });
-    const { passwordHash: _, ...result } = user;
-    return result;
+    const { passwordHash: _, ...safeUser } = user;
+    // Also issue the token so the frontend doesn't need a second request
+    const tokenPayload = { email: user.email, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(tokenPayload),
+      user: safeUser,
+    };
   }
 }

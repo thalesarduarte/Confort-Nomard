@@ -99,3 +99,8 @@
   color: #fff;
   cursor: pointer;
 }
+
+.avatarLink {
+  text-decoration: none;
+  display: flex;
+}

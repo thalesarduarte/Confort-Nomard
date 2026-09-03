@@ -6,6 +6,8 @@ export interface User {
 
 export type ThermalSensitivity = 'HEAT_LOVER' | 'TOLERANT' | 'SENSITIVE' | 'COLD_LOVER';
 export type TravelPurpose = 'DIGITAL_NOMAD' | 'EXPAT' | 'STUDENT' | 'TOURIST';
+export type WorkStyle = 'REMOTE_FIXED' | 'HYBRID' | 'NEEDS_OFFICE';
+export type PacePreference = 'FAST_PACED' | 'BALANCED' | 'SLOW_PACED';
 
 export interface UserPreferenceProfile {
   thermalSensitivity: ThermalSensitivity;
@@ -14,7 +16,23 @@ export interface UserPreferenceProfile {
   travelPurpose: TravelPurpose;
   languages: string[];
   culturalOpenness: number; // 1-10
+  workStyle?: WorkStyle;
+  pacePreference?: PacePreference;
+  priorityRanking?: string[]; // e.g. ['budget','climate','food','culture']
+  freeformTags?: string[];
+  aiNotes?: string;
 }
+
+export interface DestinationRecommendation {
+  cityId: string;
+  cityName: string;
+  country: string;
+  imageUrl?: string | null;
+  matchScore: number;
+  reason: string;
+  overallScore?: number;
+}
+
 
 export interface CitySummary {
   id: string;
