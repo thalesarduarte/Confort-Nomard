@@ -6,10 +6,6 @@ import databaseConfig from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { CitiesModule } from './modules/cities/cities.module';
-import { ClimateModule } from './modules/climate/climate.module';
-import { FoodModule } from './modules/food/food.module';
-import { LocationModule } from './modules/location/location.module';
-import { CultureModule } from './modules/culture/culture.module';
 import { AiModule } from './modules/ai/ai.module';
 
 @Module({
@@ -28,10 +24,6 @@ import { AiModule } from './modules/ai/ai.module';
     AuthModule,
     UsersModule,
     CitiesModule,
-    ClimateModule,
-    FoodModule,
-    LocationModule,
-    CultureModule,
     AiModule,
   ],
 })

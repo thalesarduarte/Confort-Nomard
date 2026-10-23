@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { FoodOverview } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { ScoreRing } from '@/components/ui/ScoreRing';
@@ -6,6 +6,8 @@ import { Chip } from '@/components/ui/Chip';
 import styles from './Modules.module.css';
 
 export const FoodModule: React.FC<{ data: FoodOverview }> = ({ data }) => {
+  const [filter, setFilter] = useState('');
+  const visible = useMemo(() => data.topEstablishments.filter(item => !filter || item.cuisine.toLowerCase().includes(filter.toLowerCase()) || item.name.toLowerCase().includes(filter.toLowerCase())), [data.topEstablishments, filter]);
   return (
     <div className={styles.moduleGrid}>
       <Card className={styles.mainCard}>
@@ -37,12 +39,13 @@ export const FoodModule: React.FC<{ data: FoodOverview }> = ({ data }) => {
         </div>
 
         <h3 className={styles.subtitle}>Top Estabelecimentos</h3>
+        <label>Filtrar por comida ou lugar <input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Ex.: brasileira, mercado" /></label>
         <div className={styles.list}>
-          {data.topEstablishments.map((est, idx) => (
-            <div key={idx} className={styles.listItem}>
+          {visible.map((est) => (
+            <div key={est.name} className={styles.listItem}>
               <div className={styles.itemMain}>
                 <span className={styles.itemName}>{est.name}</span>
-                <span className={styles.itemSub}>{est.cuisine}</span>
+                <span className={styles.itemSub}>{est.cuisine} · {est.neighborhood} · saudade {est.nostalgiaScore}%</span>
               </div>
               <span className={styles.priceTier}>{est.priceTier}</span>
             </div>

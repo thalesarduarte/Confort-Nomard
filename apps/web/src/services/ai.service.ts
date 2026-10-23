@@ -1,97 +1,14 @@
-import { api } from './api';
-import { UserPreferenceProfile, DestinationRecommendation } from '@/types';
-
-// ─── Shared types ─────────────────────────────────────────────────────────────
-
-export interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface ExtractedPreferences {
-  comfortFoods: string[];
-  freeformTags: string[];
-  notes: string;
-  workStyle?: string | null;
-  pacePreference?: string | null;
-  priorityRanking?: string[];
-}
-
-export interface OnboardingAiResponse {
-  done: boolean;
-  message: string;
-  quickReplies: string[];
-  extractedPreferences: ExtractedPreferences;
-}
-
-export interface RecommendationHighlight {
-  refId: string;
-  type: 'food' | 'neighborhood' | 'culture';
-  title: string;
-  reason: string;
-}
-
-export interface CityRecommendationsResponse {
-  summary: string;
-  highlights: RecommendationHighlight[];
-}
-
-// ─── Service ──────────────────────────────────────────────────────────────────
-
-export const aiService = {
-  /**
-   * Sends one turn of the onboarding conversation to the backend.
-   * The backend routes to Claude with tool_choice forced — always returns structured data.
-   */
-  async continueOnboarding(
-    history: ChatMessage[],
-    profileSoFar?: Partial<UserPreferenceProfile>,
-    locale = 'pt-BR',
-  ): Promise<OnboardingAiResponse> {
-    const response = await api.post<OnboardingAiResponse>('/ai/onboarding/message', {
-      history,
-      profileSoFar,
-      locale,
-    });
-    return response.data;
-  },
-
-  /**
-   * Fetches AI-generated personalized recommendations for a city.
-   * Uses only real DB data as grounding — the backend filters any hallucinated ids.
-   */
-  async getCityRecommendations(
-    cityId: string,
-    profile?: Partial<UserPreferenceProfile>,
-    freeformTags?: string[],
-    locale = 'pt-BR',
-  ): Promise<CityRecommendationsResponse> {
-    const response = await api.post<CityRecommendationsResponse>(
-      `/ai/cities/${cityId}/recommendations`,
-      { profile, freeformTags, locale },
-    );
-    return response.data;
-  },
-
-  /**
-   * Fetches AI-ranked destination recommendations based on the user profile.
-   * Returns picks sorted by matchScore, each with a personal reason.
-   */
-  async recommendDestinations(
-    profile?: Partial<UserPreferenceProfile>,
-    opts?: { freeformTags?: string[]; priorityRanking?: string[]; maxItems?: number; locale?: string },
-  ): Promise<DestinationRecommendation[]> {
-    const response = await api.post<{ picks: DestinationRecommendation[] }>(
-      '/ai/recommend-destinations',
-      {
-        profile,
-        freeformTags: opts?.freeformTags,
-        priorityRanking: opts?.priorityRanking,
-        maxItems: opts?.maxItems ?? 6,
-        locale: opts?.locale ?? 'pt-BR',
-      },
-    );
-    return response.data.picks;
-  },
+import type { UserPreferenceProfile, DestinationRecommendation } from '@/types';
+import { services, mockCityService } from './index';
+export interface ChatMessage { role:'user'|'assistant'; content:string }
+export interface ExtractedPreferences { comfortFoods:string[]; freeformTags:string[]; notes:string; workStyle?:string|null; pacePreference?:string|null; priorityRanking?:string[] }
+export interface OnboardingAiResponse { done:boolean; message:string; quickReplies:string[]; extractedPreferences:ExtractedPreferences }
+export interface RecommendationHighlight {refId:string;type:'food'|'neighborhood'|'culture';title:string;reason:string}
+export interface CityRecommendationsResponse {summary:string;highlights:RecommendationHighlight[]}
+const wait=()=>new Promise<void>(r=>setTimeout(r,600));
+const known=(id:string)=>mockCityService.getSync(id);
+export const aiService={
+ async continueOnboarding(history:ChatMessage[],_profile?:Partial<UserPreferenceProfile>,_locale='pt-BR'):Promise<OnboardingAiResponse>{await wait(); const user=history.filter(x=>x.role==='user'); if(!user.length)return {done:false,message:'O que mais ajuda você a se sentir em casa quando chega a um lugar novo?',quickReplies:['Comida familiar','Clima agradável','Fazer amizades'],extractedPreferences:{comfortFoods:[],freeformTags:[],notes:''}}; const text=user.map(x=>x.content).join(' ').toLowerCase(); const foods=['rice_beans','pasta','bread','sushi','tacos','curry','pizza','arabic','chinese','vegan'].filter(k=>text.includes(k.replace('_',' '))); return {done:user.length>=2,message:user.length>=2?'Perfeito — vou usar esses detalhes para ajustar suas sugestões.':'Entendi. O que você gostaria de priorizar no primeiro mês?',quickReplies:user.length>=2?[]:['Moradia e orçamento','Vida social','Rotina tranquila'],extractedPreferences:{comfortFoods:foods,freeformTags:text.match(/comida|clima|amigos|tranquil|família|familia/g)??[],notes:user.map(x=>x.content).join(' | ')}};},
+ async recommendDestinations(profile?:Partial<UserPreferenceProfile>,opts?:{maxItems?:number;freeformTags?:string[];priorityRanking?:string[];locale?:string}):Promise<DestinationRecommendation[]>{return (await services.recommendations.destinations(profile,opts?.maxItems??6)).map(x=>({cityId:x.city.id,cityName:x.city.name,country:x.city.country,imageUrl:null,matchScore:x.score,overallScore:x.score,reason:x.reason}));},
+ async getCityRecommendations(cityId:string,_profile?:Partial<UserPreferenceProfile>,_tags?:string[],_locale='pt-BR'):Promise<CityRecommendationsResponse>{await wait(); const city=known(cityId); if(!city)return {summary:'Destino sem dados nesta versão.',highlights:[]}; const candidates:RecommendationHighlight[]=[...city.foods.map(f=>({refId:f.id,type:'food' as const,title:f.name,reason:`Opção ${f.kind} em ${f.neighborhood}, afinidade ${f.nostalgiaScore}%.`})),...city.neighborhoods.map(n=>({refId:n.id,type:'neighborhood' as const,title:n.name,reason:`Aluguel ilustrativo de R$ ${n.rentBrl.toLocaleString('pt-BR')} e segurança ${n.safety}/10.`})),...city.culture.map(t=>({refId:t.id,type:'culture' as const,title:t.title,reason:t.description}))]; const validIds=new Set([...city.foods,...city.neighborhoods,...city.culture].map(x=>x.id)); return {summary:`Seu primeiro mês em ${city.summary.name} pode começar com um orçamento estimado de R$ ${city.monthlyCostBrl.toLocaleString('pt-BR')}. Valores e dicas são ilustrativos.`,highlights:candidates.filter(x=>validIds.has(x.refId)).slice(0,5)};},
 };
-

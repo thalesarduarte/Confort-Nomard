@@ -37,3 +37,7 @@ redis_data/
 
 # pnpm store
 .pnpm-store/
+
+# Local AI dev config (never commit)
+litellm-config.yaml
+*.local/

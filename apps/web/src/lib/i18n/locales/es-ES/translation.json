@@ -1,0 +1,16 @@
+{
+  "nav": { "home": "Inicio", "explore": "Explorar", "profile": "Perfil" },
+  "hero": {
+    "title": "¿Adónde quieres ir?",
+    "subtitle": "Descubre si una ciudad es para ti antes de llegar",
+    "searchPlaceholder": "Ej.: Tokio, Lisboa, Berlín..."
+  },
+  "onboarding": {
+    "step1Title": "¡Hola! Vamos a crear tu perfil nómada",
+    "step2Title": "¿Cómo te llevas con el clima?",
+    "step3Title": "¿De qué comidas no puedes prescindir?",
+    "step4Title": "¿Cuál es tu presupuesto mensual estimado?",
+    "step5Title": "Idiomas y cultura",
+    "next": "Siguiente", "back": "Atrás", "finish": "Explorar destinos"
+  }
+}

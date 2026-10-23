@@ -12,6 +12,9 @@ import { LocationModule } from './LocationModule';
 import { CultureModule } from './CultureModule';
 import { AiRecommendationsPanel } from './AiRecommendationsPanel';
 import styles from './CityResultsPage.module.css';
+import { useLocalDataStore } from '@/store/useLocalDataStore';
+import { services } from '@/services';
+import type { CityData } from '@/services/types';
 
 type Tab = 'climate' | 'food' | 'location' | 'culture' | 'ai';
 
@@ -20,7 +23,11 @@ export const CityResultsPage: React.FC = () => {
   const navigate = useNavigate();
   const { profile } = useUserStore();
   const cityStore = useCityStore();
+  const setLoading = useCityStore(state => state.setLoading);
+  const setCityStoreData = useCityStore(state => state.setCityData);
+  const { favorites, compared, toggleFavorite, toggleCompare } = useLocalDataStore();
   const [activeTab, setActiveTab] = useState<Tab>('climate');
+  const [cityData, setCityDetails] = useState<CityData | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -29,8 +36,10 @@ export const CityResultsPage: React.FC = () => {
     }
 
     const loadData = async () => {
-      cityStore.setLoading(true);
+      setLoading(true);
       try {
+        const cityDetails = await services.cities.detail(id);
+        setCityDetails(cityDetails);
         const sensitivity = profile?.thermalSensitivity ?? 'TOLERANT';
         const comfortFoods = profile?.comfortFoods ?? [];
         const budget = profile?.budgetMonthlyUsd ?? 2000;
@@ -45,7 +54,7 @@ export const CityResultsPage: React.FC = () => {
           citiesService.getCultureInsights(id, openness),
         ]);
 
-        cityStore.setCityData({
+        setCityStoreData({
           currentCityId: id,
           overview,
           climate,
@@ -55,13 +64,14 @@ export const CityResultsPage: React.FC = () => {
         });
       } catch (err) {
         console.error(err);
+        setCityDetails(null);
       } finally {
-        cityStore.setLoading(false);
+      setLoading(false);
       }
     };
 
     loadData();
-  }, [id]);
+  }, [id, navigate, profile, setCityStoreData, setLoading]);
 
   if (cityStore.loading || !cityStore.overview) {
     return (
@@ -79,7 +89,7 @@ export const CityResultsPage: React.FC = () => {
       <div className={styles.hero}>
         <div 
           className={styles.heroBg} 
-          style={{ backgroundImage: `url(${city.imageUrl})` }}
+          style={{ backgroundImage: city.imageUrl ? `url(${city.imageUrl})` : undefined }}
         />
         <div className={styles.heroOverlay} />
         
@@ -95,6 +105,25 @@ export const CityResultsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <section aria-label="Compatibilidade por pilar" style={{display:'flex',flexWrap:'wrap',gap:12,alignItems:'center',padding:'1rem 0'}}>
+        <span>Clima {cityStore.climate?.score ?? 0}%</span>
+        <span>Comida {cityStore.food?.score ?? 0}%</span>
+        <span>Bairros {cityStore.location?.score ?? 0}%</span>
+        <span>Cultura {cityStore.culture?.receptivityScore ?? 0}%</span>
+        <button onClick={()=>toggleFavorite(city.id)}>{favorites.includes(city.id)?'♥ Salvo':'♡ Favoritar'}</button>
+        <button onClick={()=>toggleCompare(city.id)}>{compared.includes(city.id)?'✓ Comparando':'Comparar'}</button>
+        <button onClick={()=>void navigator.clipboard?.writeText(window.location.href)}>Compartilhar</button>
+      </section>
+
+      <section aria-label="Explicação da compatibilidade e procedência dos dados" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,320px),1fr))',gap:16,margin:'0 0 1.5rem'}}>
+        <details style={{padding:18,border:'1px solid var(--border)',borderRadius:16,background:'var(--surface)'}}>
+          <summary style={{cursor:'pointer',fontWeight:700}}>Como suas preferências influenciam a pontuação</summary>
+          {services.recommendations.scoreBreakdown(city.id,profile??undefined)?.pillars.map(p=><p key={p.id}><strong>{p.label}: {p.score}% · peso {p.weight.toFixed(1)}</strong><br/><small>{p.explanation}</small></p>)}
+          <small>A média ponderada usa os critérios e prioridades do seu perfil. Os mesmos critérios são usados na tela Comparar.</small>
+        </details>
+        {cityData&&<details style={{padding:18,border:'1px solid var(--border)',borderRadius:16,background:'var(--surface)'}}><summary style={{cursor:'pointer',fontWeight:700}}>Fontes, atualização e confiança</summary><p>Os dados deste protótipo são sintéticos e ilustrativos; confiança baixa.</p>{([['Custo',cityData.provenance.cost],['Clima',cityData.provenance.climate],['Segurança',cityData.provenance.safety]] as const).map(([label,source])=><p key={label}><strong>{label}</strong> · {source.source}<br/><small>Atualizado em {new Date(`${source.updatedAt}T12:00:00`).toLocaleDateString('pt-BR')} · confiança {source.confidence}. {source.note}</small></p>)}</details>}
+      </section>
 
       <div className={styles.tabs}>
         {[

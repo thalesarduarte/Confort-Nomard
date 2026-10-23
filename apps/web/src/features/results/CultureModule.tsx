@@ -3,6 +3,7 @@ import { CultureOverview } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { ScoreRing } from '@/components/ui/ScoreRing';
 import styles from './Modules.module.css';
+import { useLocalDataStore } from '@/store/useLocalDataStore';
 
 const CAT_ICONS: Record<string, string> = {
   SOCIAL: '🤝',
@@ -13,6 +14,7 @@ const CAT_ICONS: Record<string, string> = {
 };
 
 export const CultureModule: React.FC<{ data: CultureOverview }> = ({ data }) => {
+  const { knownTips, toggleTip } = useLocalDataStore();
   return (
     <div className={styles.moduleGrid}>
       <Card className={styles.mainCard}>
@@ -45,6 +47,8 @@ export const CultureModule: React.FC<{ data: CultureOverview }> = ({ data }) => 
                 <div className={styles.insightContent}>
                   <h4 className={styles.insightTitle}>{insight.title}</h4>
                   <p className={styles.insightDesc}>{insight.description}</p>
+                  <small>Importância: {insight.importance??'média'}</small>
+                  <label style={{display:'block',marginTop:8}}><input type="checkbox" checked={knownTips.includes(insight.id)} onChange={()=>toggleTip(insight.id)}/> Já sei</label>
                 </div>
               </div>
             );

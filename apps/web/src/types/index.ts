@@ -73,6 +73,8 @@ export interface FoodOverview {
     name: string;
     cuisine: string;
     priceTier: '$' | '$$' | '$$$' | '$$$$';
+    neighborhood?: string;
+    nostalgiaScore?: number;
   }[];
   summary: string;
 }
@@ -89,6 +91,10 @@ export interface NeighborhoodData {
     total: number;
   };
   isRecommended: boolean;
+  safety?: number;
+  transit?: number;
+  x?: number;
+  y?: number;
 }
 
 export interface LocationOverview {
@@ -105,6 +111,7 @@ export interface CultureInsight {
   severity: InsightSeverity;
   title: string;
   description: string;
+  importance?: 'alta' | 'média' | 'baixa';
 }
 
 export interface CultureOverview {

@@ -10,7 +10,7 @@
 }
 
 .glass {
-  background: rgba(26, 34, 53, 0.6);
+  background: rgba(255, 254, 250, 0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -18,7 +18,7 @@
 .glow:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-glow);
-  border-color: rgba(0, 212, 170, 0.3);
+  border-color: rgba(23, 107, 91, 0.3);
 }
 
 .glow::before {
@@ -28,7 +28,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(23,107,91,0.1), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
 }

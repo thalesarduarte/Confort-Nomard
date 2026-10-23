@@ -8,7 +8,7 @@
 }
 
 .title {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 6vw, 4rem);
   line-height: 1.1;
   margin-bottom: 1rem;
 }
@@ -32,7 +32,7 @@
   font-size: 1.25rem;
   border-radius: var(--radius-lg);
   padding-left: 3.5rem;
-  background: rgba(26, 34, 53, 0.8);
+  background: rgba(255, 254, 250, 0.94);
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow-card);
 }
@@ -61,7 +61,7 @@
 }
 
 .dropdownItem:hover {
-  background: rgba(255,255,255,0.05);
+  background: var(--surface-alt);
 }
 
 .cityIcon {
@@ -102,6 +102,7 @@
   height: 200px;
   background-size: cover;
   background-position: center;
+  background-image: radial-gradient(circle at 78% 24%, rgba(255, 226, 181, .78) 0 9%, transparent 9.5%), linear-gradient(135deg, #9eb9a2, #507a68 55%, #d0a078);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
@@ -178,7 +179,7 @@
 }
 
 .ctaBtn {
-  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  background: linear-gradient(135deg, var(--accent-teal), #2D8872);
   color: white;
   font-weight: 700;
   padding: 0.6rem 1.25rem;
@@ -186,4 +187,14 @@
   font-size: 0.9rem;
   white-space: nowrap;
   cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 2.4rem 0 3rem; }
+  .subtitle { font-size: 1.05rem; margin-bottom: 1.7rem; }
+  .grid { grid-template-columns: 1fr; gap: 1rem; }
+  .cityImage { height: 170px; }
+  .cityInfo { padding: 1.1rem; }
+  .ctaBanner { align-items: flex-start; flex-wrap: wrap; font-size: 1rem; }
+  .ctaBtn { margin-left: 2.5rem; }
 }

@@ -6,11 +6,12 @@
   height: 72px;
   z-index: 100;
   transition: all 0.3s ease;
-  background: transparent;
+  background: rgba(246, 245, 239, 0.92);
+  border-bottom: 1px solid var(--border);
 }
 
 .scrolled {
-  background: rgba(10, 14, 26, 0.8);
+  background: rgba(255, 254, 250, 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -30,6 +31,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .logoIcon {
@@ -43,16 +45,23 @@
 }
 
 .nav {
-  display: none;
+  display: flex;
+  flex: 1 1 auto;
+  max-width: 760px;
   align-items: center;
-  gap: 2rem;
+  gap: clamp(0.5rem, 1.5vw, 1.5rem);
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
-
-@media (min-width: 768px) {
-  .nav {
-    display: flex;
-  }
-}
+.nav::-webkit-scrollbar { display: none; }
+.mobileMore { display: none; position: relative; color: var(--text-secondary); font-weight: 600; font-size: .8rem; }
+.mobileMore summary { cursor: pointer; list-style: none; white-space: nowrap; }
+.mobileMore summary::-webkit-details-marker { display: none; }
+.moreMenu { position: absolute; top: calc(100% + .8rem); right: 0; z-index: 20; display: grid; min-width: 170px; gap: .15rem; padding: .5rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface); box-shadow: var(--shadow-card); }
+.moreMenu a { padding: .65rem .75rem; border-radius: .6rem; color: var(--text-primary); white-space: nowrap; }
+.moreMenu a:hover { background: var(--surface-alt); }
+.optionalNavLink { display: inline; }
 
 .link {
   color: var(--text-secondary);
@@ -66,12 +75,14 @@
 
 .active {
   color: var(--accent-teal);
+  font-weight: 700;
 }
 
 .actions {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .langToggle {
@@ -84,7 +95,7 @@
 
 .langToggle:hover {
   color: var(--text-primary);
-  background: rgba(255,255,255,0.05);
+  background: rgba(39,66,56,0.06);
 }
 
 .avatar {
@@ -98,6 +109,23 @@
   font-weight: 700;
   color: #fff;
   cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .container { padding: 0 0.85rem; gap: 0.6rem; }
+  .nav { gap: 0.8rem; flex: 1 1 0; width: 0; justify-content: flex-start; }
+  .link { font-size: 0.78rem; white-space: nowrap; }
+  .optionalNavLink { display: none; }
+  .mobileMore { display: block; }
+  .logoText { font-size: 0.98rem; }
+  .logoIcon { font-size: 1.2rem; }
+  .actions { gap: 0.3rem; }
+  .langToggle { font-size: 0.75rem; }
+}
+
+@media (max-width: 430px) {
+  .logoText { display: none; }
+  .nav { justify-content: flex-start; }
 }
 
 .avatarLink {

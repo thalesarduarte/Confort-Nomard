@@ -107,10 +107,18 @@ export class AiService {
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('ANTHROPIC_API_KEY');
     this.model = this.configService.get<string>('ANTHROPIC_MODEL') ?? 'claude-sonnet-5';
+    const baseUrl = this.configService.get<string>('ANTHROPIC_BASE_URL');
 
     if (apiKey) {
-      this.client = new Anthropic({ apiKey });
-      this.logger.log(`AiService initialized with model: ${this.model}`);
+      if (baseUrl) {
+        this.client = new Anthropic({ apiKey, baseURL: baseUrl });
+        this.logger.log(
+          `AiService initialized against LOCAL endpoint (${baseUrl}) with model: ${this.model}`,
+        );
+      } else {
+        this.client = new Anthropic({ apiKey });
+        this.logger.log(`AiService initialized with model: ${this.model}`);
+      }
     } else {
       this.logger.warn('ANTHROPIC_API_KEY not set — AI endpoints will return 503');
     }

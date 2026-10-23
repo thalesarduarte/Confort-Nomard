@@ -20,7 +20,7 @@ export const Header: React.FC = () => {
   }, []);
 
   const toggleLanguage = () => {
-    const nextLang = i18n.language.startsWith('pt') ? 'en-US' : 'pt-BR';
+    const nextLang = i18n.language.startsWith('pt') ? 'en-US' : i18n.language.startsWith('en') ? 'es-ES' : 'pt-BR';
     i18n.changeLanguage(nextLang);
   };
 
@@ -39,11 +39,21 @@ export const Header: React.FC = () => {
           <Link to="/search" className={`${styles.link} ${location.pathname === '/search' ? styles.active : ''}`}>
             {t('nav.explore')}
           </Link>
+          <Link to="/favorites" className={`${styles.link} ${styles.optionalNavLink}`}>Salvos</Link>
+          <Link to="/community" className={`${styles.link} ${styles.optionalNavLink}`}>Comunidade</Link>
+          <Link to="/partners" className={`${styles.link} ${styles.optionalNavLink}`}>Parceiros</Link>
+          <Link to="/business" className={`${styles.link} ${styles.optionalNavLink}`}>Empresas</Link>
+          <details className={styles.mobileMore}>
+            <summary>Mais</summary>
+            <div className={styles.moreMenu}>
+              <Link to="/favorites">Salvos</Link><Link to="/community">Comunidade</Link><Link to="/partners">Parceiros</Link><Link to="/business">Empresas</Link>
+            </div>
+          </details>
         </nav>
 
         <div className={styles.actions}>
           <button onClick={toggleLanguage} className={styles.langToggle}>
-            {i18n.language.startsWith('pt') ? 'PT' : 'EN'}
+            {i18n.language.startsWith('pt') ? 'PT' : i18n.language.startsWith('en') ? 'EN' : 'ES'}
           </button>
           
           {isLoggedIn ? (

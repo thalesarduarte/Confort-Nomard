@@ -10,6 +10,7 @@ export const Footer: React.FC = () => {
       fontSize: '0.875rem'
     }}>
       <p>Comfort Nomad © {new Date().getFullYear()}. Sinta-se em casa, antes mesmo de chegar.</p>
+      <p>Sobre · Dados fictícios e ilustrativos nesta versão.</p>
     </footer>
   );
 };

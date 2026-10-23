@@ -17,9 +17,9 @@
 
 /* Variants */
 .primary {
-  background: linear-gradient(135deg, var(--accent-teal), #00A685);
-  color: #000;
-  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2);
+  background: linear-gradient(135deg, #176B5B, #2D8872);
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(23, 107, 91, 0.2);
 }
 
 .primary:hover:not(:disabled) {
@@ -28,13 +28,13 @@
 }
 
 .secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-alt);
   color: var(--text-primary);
   border-color: var(--border);
 }
 
 .secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface);
   border-color: var(--border-highlight);
 }
 
@@ -44,7 +44,7 @@
 }
 
 .ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(39, 66, 56, 0.06);
 }
 
 .danger {
@@ -91,6 +91,6 @@
 }
 
 .primary .spinner {
-  border: 2px solid rgba(0,0,0,0.3);
-  border-top-color: #000;
+  border: 2px solid rgba(255,255,255,0.36);
+  border-top-color: #fff;
 }

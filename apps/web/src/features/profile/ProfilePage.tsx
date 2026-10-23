@@ -88,15 +88,22 @@ export const ProfilePage: React.FC = () => {
     navigate("/");
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Excluir sua conta de demonstração deste dispositivo?')) return;
+    await authService.deleteAccount();
+    navigate('/');
+  };
+
   return (
     <PageWrapper className={styles.wrapper}>
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Meu Perfil</h1>
           {isLoggedIn && (
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              Sair
-            </Button>
+            <div style={{display:'flex',gap:8}}>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>Sair</Button>
+              <Button variant="ghost" size="sm" onClick={handleDeleteAccount}>Excluir conta</Button>
+            </div>
           )}
         </div>
 

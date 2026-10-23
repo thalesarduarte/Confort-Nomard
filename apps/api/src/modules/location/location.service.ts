@@ -10,7 +10,7 @@ export class LocationService {
     @InjectRepository(Neighborhood)
     private neighborhoodRepo: Repository<Neighborhood>,
     @InjectRepository(CostOfLiving)
-    private costRepo: Repository<CostOfLiving>
+    private costRepo: Repository<CostOfLiving>,
   ) {}
 
   async getNeighborhoods(cityId: string): Promise<Neighborhood[]> {
@@ -24,11 +24,10 @@ export class LocationService {
   async matchNeighborhoods(cityId: string, budget: number, currency: string) {
     const neighborhoods = await this.getNeighborhoods(cityId);
     return neighborhoods.filter(n => {
-      // Very basic currency handling, in a real app would use fx rates
       if (n.costOfLiving && n.costOfLiving.currency === currency) {
         return n.costOfLiving.monthlyTotal <= budget;
       }
-      return true; // Return true if unable to match exactly
+      return true;
     });
   }
 }
