@@ -1,0 +1,30 @@
+.skip-link{position:fixed;z-index:100;top:8px;left:8px;transform:translateY(-160%);padding:12px 16px;border-radius:10px;background:var(--text);color:var(--bg);font-weight:800}
+.skip-link:focus{transform:translateY(0)}
+.mobile-nav-toggle{display:none}
+.menu-popover{position:absolute;right:18px;top:58px;z-index:25;padding:12px}
+.fieldset-reset{min-width:0;border:0;padding:0;margin:0}
+.fieldset-reset legend{font-weight:750;margin-bottom:10px}
+.check-option{min-height:44px;align-items:center;padding:8px}
+.check-option input{width:20px;height:20px;accent-color:var(--primary)}
+.official-check{display:block;margin-top:6px;color:var(--primary);font-weight:750}
+.score-effect{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:.78rem;font-weight:750}
+.score-effect-positive{background:var(--mint);color:var(--text)}
+.score-effect-neutral{background:var(--surface-2);color:var(--text)}
+.score-effect-negative{background:color-mix(in srgb,var(--danger) 14%,var(--surface));color:var(--danger)}
+.review-history{margin-top:10px;padding-left:20px}
+.review-history li+li{margin-top:6px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline-color:var(--accent);outline-offset:3px}
+@media(max-width:720px){
+  .mobile-nav-toggle{display:inline-flex;min-width:44px;padding-inline:12px}
+  .header-inner{position:relative}
+  .main-nav.is-open{position:absolute;display:flex;flex-direction:column;align-items:stretch;gap:8px;top:calc(100% + 8px);left:12px;right:12px;z-index:30;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)}
+  .main-nav.is-open a{padding:10px 8px;font-size:1rem}
+  .main-nav.is-open details summary{width:100%}
+  .main-nav.is-open .menu-popover{position:static;margin-top:8px;box-shadow:none}
+  .language-select{width:62px!important}
+  .header-actions{gap:6px}
+  .task-row{gap:10px}
+  .task-row input{flex:0 0 22px}
+}
+@media(pointer:coarse){.button,.tab,.icon-button{min-height:48px}.check-option input,.task-row input{min-width:22px;min-height:22px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.city-card:hover,.button:hover{transform:none;box-shadow:none}}

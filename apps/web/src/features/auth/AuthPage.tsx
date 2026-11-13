@@ -1,0 +1,11 @@
+import {useState,type FormEvent} from 'react';
+import {Link,useNavigate} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
+import {Card,Button} from '@/design/components';
+import {services} from '@/services';
+
+export function AuthPage(){
+  const {t}=useTranslation();const navigate=useNavigate();const [register,setRegister]=useState(false);const [name,setName]=useState('');const [email,setEmail]=useState('');const [password,setPassword]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('');
+  const submit=async(event:FormEvent)=>{event.preventDefault();setBusy(true);setError('');try{if(register)await services.auth.register(name,email,password);else await services.auth.login(email,password);navigate('/favorites');}catch(reason){setError(reason instanceof Error?t(reason.message,{defaultValue:reason.message}):t('common.error'));}finally{setBusy(false);}};
+  return <main id="main-content" className="container page page-content" style={{maxWidth:620}}><Card><span className="eyebrow">{t('ui.accountOptional')}</span><h1 style={{fontSize:'clamp(2rem,5vw,3rem)'}}>{register?t('auth.registerTitle'):t('auth.loginTitle')}</h1><p className="muted">{t('auth.note')}</p><form className="stack" onSubmit={event=>void submit(event)}>{register&&<label className="field">{t('auth.name')}<input value={name} onChange={event=>setName(event.target.value)} autoComplete="name" required minLength={2}/></label>}<label className="field">{t('auth.email')}<input type="email" value={email} onChange={event=>setEmail(event.target.value)} autoComplete="email" required/></label><label className="field">{t('auth.password')}<input type="password" value={password} onChange={event=>setPassword(event.target.value)} autoComplete={register?'new-password':'current-password'} required minLength={8}/></label>{register&&<small>{t('ui.demoPasswordNote')}</small>}{error&&<p role="alert" className="error">{error}</p>}<Button type="submit" variant="primary" disabled={busy}>{busy?t('actions.loading'):register?t('auth.register'):t('actions.login')}</Button></form><hr className="divider"/><div className="row spread"><button className="button button-quiet" onClick={()=>{setRegister(!register);setError('');}}>{register?t('auth.already'):t('auth.create')}</button><Link to="/">{t('ui.continueNoAccount')}</Link></div></Card></main>;
+}
