@@ -4,6 +4,7 @@ import { mockCitiesService } from './mock/cities.service';
 import { mockAuthService } from './mock/auth.service';
 import { mockCommunityService } from './mock/community.service';
 import { mockBusinessService } from './mock/business.service';
+import { mockAdminAuthService } from './mock/adminAuth.service';
 import { wait } from './mock/storage';
 import { scoreCity } from '@/domain/scoring';
 import { buildArrivalPlan, simulateFirstMonth } from '@/domain/simulation';
@@ -19,6 +20,7 @@ const mockServices:ComfortServices={
     async arrivalPlan(cityId,date,options){await wait(420);const city=citySeed.find(item=>item.id===cityId);return city?buildArrivalPlan(city,date,options):[];},
   },
   auth:mockAuthService,
+  adminAuth:mockAdminAuthService,
   business:mockBusinessService,
   community:mockCommunityService,
 };

@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Comfort Nomad",
+    "slug": "comfort-nomad",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": { "bundleIdentifier": "com.comfortnomad.app", "supportsTablet": true },
+    "android": { "package": "com.comfortnomad.app" }
+  }
+}

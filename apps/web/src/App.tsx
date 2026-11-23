@@ -2,6 +2,7 @@ import {Suspense,lazy,useEffect} from 'react';
 import {BrowserRouter,Route,Routes,useLocation} from 'react-router-dom';
 import {Header,Footer} from '@/app/Shell';
 import {ProtectedRoute} from '@/app/ProtectedRoute';
+import {ProtectedAdminRoute} from '@/app/ProtectedAdminRoute';
 import {useAppStore} from '@/store/appStore';
 import i18n from '@/i18n';
 
@@ -17,6 +18,8 @@ const Partners=lazy(()=>import('@/features/partners/PartnersPage').then(module=>
 const Business=lazy(()=>import('@/features/b2b/BusinessPage').then(module=>({default:module.BusinessPage})));
 const Auth=lazy(()=>import('@/features/auth/AuthPage').then(module=>({default:module.AuthPage})));
 const About=lazy(()=>import('@/features/about/AboutPage').then(module=>({default:module.AboutPage})));
+const Admin=lazy(()=>import('@/features/admin/AdminPage').then(module=>({default:module.AdminPage})));
+const AdminLogin=lazy(()=>import('@/features/admin/AdminLoginPage').then(module=>({default:module.AdminLoginPage})));
 
 function ThemeSync(){const theme=useAppStore(state=>state.theme);const language=useAppStore(state=>state.language);useEffect(()=>{document.documentElement.dataset.theme=theme;document.documentElement.lang=language;void i18n.changeLanguage(language);},[theme,language]);return null;}
 function MainContentSync(){const {pathname}=useLocation();useEffect(()=>{const setMainId=()=>document.querySelector<HTMLElement>('main:not([id])')?.setAttribute('id','main-content');setMainId();const observer=new MutationObserver(setMainId);observer.observe(document.querySelector('#root')??document.body,{childList:true,subtree:true});return()=>observer.disconnect();},[pathname]);return null;}
@@ -26,6 +29,6 @@ export default function App(){return <BrowserRouter><ThemeSync/><MainContentSync
   <Route path="/" element={<Home/>}/><Route path="/search" element={<Search/>}/><Route path="/onboarding" element={<Onboarding/>}/><Route path="/city/:cityId" element={<City/>}/>
   <Route path="/compare" element={<Compare/>}/><Route path="/login" element={<Auth/>}/>
   <Route path="/profile" element={<ProtectedRoute><Profile/></ProtectedRoute>}/><Route path="/favorites" element={<ProtectedRoute><Favorites/></ProtectedRoute>}/><Route path="/community" element={<ProtectedRoute><Community/></ProtectedRoute>}/>
-  <Route path="/partners" element={<Partners/>}/><Route path="/business" element={<Business/>}/><Route path="/about" element={<About/>}/>
+  <Route path="/partners" element={<Partners/>}/><Route path="/business" element={<Business/>}/><Route path="/about" element={<About/>}/><Route path="/admin/login" element={<AdminLogin/>}/><Route path="/admin" element={<ProtectedAdminRoute><Admin/></ProtectedAdminRoute>}/>
   <Route path="*" element={<main id="main-content" className="container page-content"><h1>Página não encontrada</h1><a className="button button-primary" href="/">Voltar ao início</a></main>}/>
 </Routes></Suspense><Footer/></BrowserRouter>;}

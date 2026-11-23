@@ -1,0 +1,171 @@
+openapi: 3.1.0
+info:
+  title: Comfort Nomad API
+  version: 0.1.0
+  description: Contrato inicial. A API não fornece conteúdo de cidades até haver dados e fontes aprovados.
+servers:
+  - url: /api/v1
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API disponível
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, service]
+                properties:
+                  status: { type: string, const: ok }
+                  service: { type: string, const: comfort-nomad-api }
+  /cities:
+    get:
+      operationId: listCities
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 120 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+      responses:
+        '200':
+          description: Cidades cadastradas (lista vazia até uma fonte ser aprovada)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/City' } }
+                  meta:
+                    type: object
+                    properties: { count: { type: integer } }
+  /cities/{slug}:
+    get:
+      operationId: getCity
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Detalhes de uma cidade cadastrada
+          content:
+            application/json:
+              schema: { type: object, properties: { data: { $ref: '#/components/schemas/CityDetail' } } }
+        '404': { $ref: '#/components/responses/Error' }
+  /auth/register:
+    post:
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, name, password]
+              properties:
+                email: { type: string, format: email, maxLength: 320 }
+                name: { type: string, minLength: 2, maxLength: 120 }
+                password: { type: string, minLength: 12 }
+                locale: { type: string, enum: [pt-BR, en, es], default: pt-BR }
+      responses:
+        '201': { $ref: '#/components/responses/AuthResult' }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /auth/login:
+    post:
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/AuthResult' }
+        '401': { $ref: '#/components/responses/Error' }
+  /users/me/preferences:
+    get:
+      operationId: getPreferences
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Perfil de preferências, content: { application/json: { schema: { type: object, properties: { data: { type: object, additionalProperties: true } } } } } }
+        '401': { $ref: '#/components/responses/Error' }
+    put:
+      operationId: updatePreferences
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Preferências atualizadas }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    City:
+      type: object
+      required: [id, slug, name, country, countryCode, timezone, language, currency]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        name: { type: string }
+        country: { type: string }
+        countryCode: { type: string, minLength: 2, maxLength: 2 }
+        timezone: { type: string }
+        language: { type: string }
+        currency: { type: string }
+        coordinates:
+          type: object
+          properties:
+            latitude: { type: [number, 'null'] }
+            longitude: { type: [number, 'null'] }
+    CityDetail:
+      allOf:
+        - $ref: '#/components/schemas/City'
+        - type: object
+          properties:
+            tagline: { type: [string, 'null'] }
+            counts:
+              type: object
+              properties:
+                neighborhoods: { type: integer }
+                climateMonths: { type: integer }
+    ErrorBody:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+  responses:
+    Error:
+      description: Erro da API
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorBody' }
+    AuthResult:
+      description: Sessão iniciada
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  user:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid }
+                      email: { type: string, format: email }
+                      name: { type: string }
+                      locale: { type: string, enum: [pt-BR, en, es] }

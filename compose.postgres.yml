@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: comfort_nomad
+      POSTGRES_USER: comfort_nomad
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your shell before starting PostgreSQL}
+    ports:
+      - "5432:5432"
+    volumes:
+      - comfort_nomad_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comfort_nomad -d comfort_nomad"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  comfort_nomad_pgdata:

@@ -48,12 +48,14 @@ export interface Account { id: string; name: string; email: string; passwordHash
 export interface PartnerOffer { id:string;category:string;title:string;description:string;estimate:string;terms:string }
 export interface RelocationEmployee { id:string;name:string;cityId:string;score:number;alert:string;checklistDone:number;checklistTotal:number }
 export interface AuthState { account: Omit<Account,'passwordHash'>|null; isLoggedIn: boolean; profile: Profile|null; tempProfile: ProfilePatch|null }
+export interface AdminSession { email: string }
 
 export interface ComfortServices {
   cities: { list(): Promise<City[]>; detail(id: string): Promise<City|null>; search(query: string): Promise<City[]> };
   recommendations: { forProfile(profile: ProfilePatch|null, limit?: number): Promise<Recommendation[]>; explain(cityId: string, profile: ProfilePatch|null): ScoreBreakdown|null };
   simulation: { firstMonth(cityId: string, profile: ProfilePatch|null): Promise<FirstMonthWeek[]>; arrivalPlan(cityId: string, date: string, options: ArrivalPlanOptions): Promise<ArrivalTask[]> };
   auth: { register(name: string, email: string, password: string): Promise<void>; login(email: string, password: string): Promise<void>; logout(): void; deleteAccount(): void };
+  adminAuth: { login(email: string, password: string): Promise<void>; logout(): void };
   business: { offers(): Promise<PartnerOffer[]>; employees(): Promise<RelocationEmployee[]>; submitLead(company:string,email:string): Promise<void> };
   community: { rules(): string[]; list(): Promise<Contribution[]>; reports(): Promise<CommunityReport[]>; history(contributionId?: string): Promise<ModerationEvent[]>; submit(input: Omit<Contribution,'id'|'status'|'author'|'authorId'|'votes'|'createdAt'|'note'>): Promise<void>; update(id: string, input: Pick<Contribution,'title'|'body'>): Promise<void>; remove(id: string): Promise<void>; vote(id: string, value: -1|1): Promise<void>; report(id: string, reason: CommunityReport['reason'], details: string): Promise<void>; moderate(id: string, status: 'aprovado'|'ajustes', note: string): Promise<void> };
 }
